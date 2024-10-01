@@ -47,10 +47,10 @@ public class QLearn
     public void Lose()
     {
         _losses++;
-        previous.Last().Heroistic -= 100;
+        previous.Last().Heroistic -= 10;
         foreach (var state in previous)
         {
-            state.Heroistic--;
+            state.Heroistic-=2;
         }
 
         previous.Clear();
@@ -60,9 +60,10 @@ public class QLearn
     {
         _wins++;
         previous.Last().Heroistic += 10;
+        
         foreach (var state in previous)
         {
-            state.Heroistic++;
+            state.Heroistic += 1;
         }
 
         previous.Clear();

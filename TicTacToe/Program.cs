@@ -33,16 +33,21 @@ namespace Tickie_tickie_tow
         static int flag = 0;
         private static int train = 0;
         private static int trainMax = 10000000;
-
+        private static QLearn? learn2 = null;
+        private static int aiKickIn = 9000000;
+        private static QLearn learn1 = new ();
         static void Main(string[] args)
         {
-            QLearn learn1 = new QLearn();
 
             //    QLearn qol = new QLearn();
             for (int i = 0; true; i++)
             {
-                arr = (char[])Permanent.Clone();
+                if (train == aiKickIn)
+                    learn2 = new QLearn();
+                if (learn2 != null && train >= trainMax)
+                    learn2 = null;
 
+                arr = (char[])Permanent.Clone();
 
                 do
                 {
@@ -55,9 +60,12 @@ namespace Tickie_tickie_tow
                         Board(); // calling the board Function
                         if (train < trainMax)
                         {
-                            List<char> moves = arr.Where(x => x != 'X' && x != 'O' && x != '0').ToList();
-                            int move = RND.Range(0, moves.Count);
-                            choice = int.Parse(moves[move].ToString());
+                            var moves = arr.Where(x => x != 'X' && x != 'O' && x != '0').ToList();
+
+                            if (learn2 != null)
+                                choice = int.Parse(learn2.NextMove(moves.ToArray()).ToString());
+                            else
+                                choice = int.Parse(moves[RND.Range(0, moves.Count)].ToString());
                         }
                         else
                         {
@@ -107,12 +115,12 @@ namespace Tickie_tickie_tow
                     if (player % 2 == 1)
                     {
                         learn1.Lose();
-                        //learn2.Win();
+                        learn2?.Win();
                     }
                     else
                     {
                         learn1.Win();
-                        //learn2.Lose();
+                        learn2?.Lose();
                     }
 
                     WinningMessage();
@@ -120,7 +128,7 @@ namespace Tickie_tickie_tow
                 else // if flag value is -1 the match will be draw and no one is winner
                 {
                     learn1.Draw();
-                    //learn2.Draw();
+                    learn2?.Draw();
                     DrawMessage();
                 }
 
@@ -163,12 +171,13 @@ namespace Tickie_tickie_tow
                 Console.WriteLine("Player1:X and Player2:O");
                 Console.WriteLine("\n");
             }
-            if (train < trainMax && train % 10000 == 0)
+
+            if (train < trainMax && train % 100000 == 0)
             {
                 Console.Clear();
                 learn.Stats();
-            };
-
+                learn2?.Stats();
+            }
         }
 
         public static class RND
